@@ -256,8 +256,8 @@ router.put('/:id', async (req: AuthRequest, res, next) => {
     if (data.accountBalance !== undefined) updateData.accountBalance = data.accountBalance;
     if (data.fees !== undefined) updateData.fees = data.fees;
     if (data.strategyId !== undefined) updateData.strategyId = data.strategyId;
-    if (data.tags !== undefined) updateData.tags = JSON.stringify(data.tags);
-    if (data.mistakeTags !== undefined) updateData.mistakeTags = JSON.stringify(data.mistakeTags);
+    if (data.tags !== undefined) updateData.tags = data.tags;
+    if (data.mistakeTags !== undefined) updateData.mistakeTags = data.mistakeTags;
     if (data.notes !== undefined) updateData.notes = data.notes;
     if (data.executionRating !== undefined) updateData.executionRating = data.executionRating;
 
@@ -473,8 +473,8 @@ router.post('/import/csv', multer({ storage: multer.memoryStorage() }).single('f
             pnlPercent,
             rr,
             result,
-            tags: JSON.stringify(data.tags),
-            mistakeTags: JSON.stringify(data.mistakeTags),
+            tags: data.tags,
+            mistakeTags: data.mistakeTags,
             notes: data.notes ?? null,
             executionRating: data.executionRating ?? null,
           },

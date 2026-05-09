@@ -119,7 +119,7 @@ export function computeSummary(trades: Trade[]): AnalyticsSummary {
 
   const avgWin = wins.length > 0 ? winSum / wins.length : 0;
   const avgLoss = losses.length > 0 ? lossSum / losses.length : 0;
-  const profitFactor = lossSum > 0 ? winSum / lossSum : winSum > 0 ? Infinity : 0;
+  const profitFactor = lossSum > 0 ? winSum / lossSum : winSum > 0 ? 9999 : 0;
   const expectancy = winRate * avgWin - (1 - winRate) * avgLoss;
 
   const rrTrades = closed.filter((t) => t.rr != null);
@@ -285,7 +285,7 @@ export function computeStrategyStats(
         rrTrades.length > 0
           ? rrTrades.reduce((s, t) => s + (t.rr ?? 0), 0) / rrTrades.length
           : 0,
-      profitFactor: lossSum > 0 ? winSum / lossSum : winSum > 0 ? Infinity : 0,
+      profitFactor: lossSum > 0 ? winSum / lossSum : winSum > 0 ? 9999 : 0,
     };
   });
 }

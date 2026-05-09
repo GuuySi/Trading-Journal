@@ -46,9 +46,9 @@ export function DashboardPage() {
 
   const winRatePct = summary ? (summary.winRate * 100).toFixed(1) : '—';
   const pfDisplay = summary
-    ? isFinite(summary.profitFactor)
-      ? summary.profitFactor.toFixed(2)
-      : '∞'
+    ? (summary.profitFactor == null || summary.profitFactor >= 9999)
+      ? '∞'
+      : summary.profitFactor.toFixed(2)
     : '—';
 
   return (
