@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -59,8 +59,8 @@ model Trade {
   // Categorization
   strategyId     String?
   strategy       Strategy? @relation(fields: [strategyId], references: [id])
-  tags           String    @default("[]") // JSON array of strings
-  mistakeTags    String    @default("[]") // JSON: "FOMO"|"REVENGE"|"EARLY_EXIT"|"OVERSIZE"|"NO_PLAN"
+  tags           Json      @default("[]") // array of strings
+  mistakeTags    Json      @default("[]") // "FOMO"|"REVENGE"|"EARLY_EXIT"|"OVERSIZE"|"NO_PLAN"
 
   // Journal
   notes          String?
