@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  displayName  String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  trades       Trade[]
+  strategies   Strategy[]
+}
+
+model Trade {
+  id             String    @id @default(cuid())
+  userId         String
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Instrument
+  symbol         String
+  direction      String    // "LONG" | "SHORT"
+  mode           String    @default("LIVE") // "LIVE" | "PAPER"
+
+  // Timing
+  entryTime      DateTime
+  exitTime       DateTime?
+
+  // Prices
+  entryPrice     Float
+  exitPrice      Float?
+  stopLoss       Float?
+  takeProfit     Float?
+
+  // Sizing
+  positionSize   Float
+  accountBalance Float?    // account balance at entry (for % calcs)
+
+  // Financials (calculated on save)
+  fees           Float     @default(0)
+  pnl            Float?
+  pnlPercent     Float?
+
+  // Risk metrics (calculated on save)
+  riskAmount     Float?
+  riskPercent    Float?
+  rewardAmount   Float?
+  rr             Float?    // realized R:R
+
+  // Result
+  result         String    @default("OPEN") // "WIN" | "LOSS" | "BREAKEVEN" | "OPEN"
+
+  // Categorization
+  strategyId     String?
+  strategy       Strategy? @relation(fields: [strategyId], references: [id])
+  tags           String    @default("[]") // JSON array of strings
+  mistakeTags    String    @default("[]") // JSON: "FOMO"|"REVENGE"|"EARLY_EXIT"|"OVERSIZE"|"NO_PLAN"
+
+  // Journal
+  notes          String?
+  executionRating Int?     // 1-10
+  screenshotUrl  String?
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([userId, entryTime])
+  @@index([userId, symbol])
+  @@index([userId, result])
+  @@index([userId, mode])
+  @@index([userId, strategyId])
+}
+
+model Strategy {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  trades      Trade[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, name])
+}

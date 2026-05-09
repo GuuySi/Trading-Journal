@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-surface text-zinc-100;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-1;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-4 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-zinc-500;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-2 border border-border rounded-xl p-4;
+  }
+
+  .card-header {
+    @apply text-sm font-medium text-zinc-400 uppercase tracking-wide mb-3;
+  }
+
+  .metric-value {
+    @apply font-mono text-2xl font-semibold text-zinc-50;
+  }
+
+  .pnl-positive {
+    @apply text-profit font-mono font-semibold;
+  }
+
+  .pnl-negative {
+    @apply text-loss font-mono font-semibold;
+  }
+
+  .badge-win {
+    @apply bg-profit-muted text-profit text-xs font-semibold px-2 py-0.5 rounded;
+  }
+
+  .badge-loss {
+    @apply bg-loss-muted text-loss text-xs font-semibold px-2 py-0.5 rounded;
+  }
+
+  .badge-open {
+    @apply bg-accent-muted text-accent text-xs font-semibold px-2 py-0.5 rounded;
+  }
+
+  .badge-breakeven {
+    @apply bg-zinc-800 text-zinc-400 text-xs font-semibold px-2 py-0.5 rounded;
+  }
+
+  .input-base {
+    @apply w-full bg-surface-3 border border-border rounded-lg px-3 py-2 text-zinc-100
+           text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-1
+           focus:ring-accent focus:border-accent transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-dim text-white font-medium px-4 py-2 rounded-lg
+           transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply text-zinc-400 hover:text-zinc-100 hover:bg-surface-3 px-3 py-2 rounded-lg
+           transition-colors text-sm;
+  }
+
+  .btn-danger {
+    @apply bg-loss-muted hover:bg-loss/20 text-loss font-medium px-4 py-2 rounded-lg
+           transition-colors text-sm;
+  }
+}
