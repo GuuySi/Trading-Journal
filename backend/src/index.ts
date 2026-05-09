@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import routes from './routes/index';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -32,12 +33,15 @@ app.get('/health', (_req, res) => {
 });
 
 // Serve frontend in production
-if (isProduction) {
-  const frontendDist = path.join(__dirname, '../../frontend/dist');
+const frontendDist = path.join(__dirname, '../../frontend/dist');
+const indexHtml = path.join(frontendDist, 'index.html');
+console.log(`Frontend dist path: ${frontendDist} (exists: ${fs.existsSync(frontendDist)})`);
+
+if (fs.existsSync(indexHtml)) {
   app.use(express.static(frontendDist));
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(frontendDist, 'index.html'));
-  });
+  app.get('*', (_req, res) => res.sendFile(indexHtml));
+} else {
+  app.get('*', (_req, res) => res.status(503).send('Frontend not built'));
 }
 
 app.use(errorHandler);
