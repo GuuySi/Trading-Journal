@@ -4,13 +4,12 @@ export function calculateTradePnL(trade: {
   direction: string;
   entryPrice: number;
   exitPrice: number | null;
-  positionSize: number;
   fees: number;
   stopLoss?: number | null;
-  accountBalance?: number | null;
+  riskAmount?: number | null;
 }): {
   pnl: number | null;
-  pnlPercent: number | null;
+  pnlPercent: null;
   rr: number | null;
   result: string;
 } {
@@ -18,32 +17,31 @@ export function calculateTradePnL(trade: {
     return { pnl: null, pnlPercent: null, rr: null, result: 'OPEN' };
   }
 
-  const multiplier = trade.direction === 'LONG' ? 1 : -1;
-  const grossPnl =
-    multiplier * (trade.exitPrice - trade.entryPrice) * trade.positionSize;
-  const pnl = grossPnl - trade.fees;
+  const dirMultiplier = trade.direction === 'LONG' ? 1 : -1;
+  const epsilon = 0.0001;
 
-  const costBasis = trade.entryPrice * trade.positionSize;
-  const pnlPercent = costBasis > 0 ? (pnl / costBasis) * 100 : null;
-
-  let rr: number | null = null;
-  if (trade.stopLoss != null && trade.stopLoss !== trade.entryPrice) {
-    const riskPerUnit = Math.abs(trade.entryPrice - trade.stopLoss);
-    const rewardPerUnit = Math.abs(trade.exitPrice - trade.entryPrice);
-    rr = rewardPerUnit / riskPerUnit;
+  if (!trade.stopLoss || !trade.riskAmount || trade.riskAmount <= 0 || trade.stopLoss === trade.entryPrice) {
+    const move = (trade.exitPrice - trade.entryPrice) * dirMultiplier;
+    const result = Math.abs(move) < epsilon ? 'BREAKEVEN' : move > 0 ? 'WIN' : 'LOSS';
+    return { pnl: null, pnlPercent: null, rr: null, result };
   }
+
+  const riskPerUnit = Math.abs(trade.entryPrice - trade.stopLoss);
+  const movePerUnit = (trade.exitPrice - trade.entryPrice) * dirMultiplier;
+  const rr = movePerUnit / riskPerUnit;
+  const pnl = trade.riskAmount * rr - trade.fees;
 
   let result: string;
-  const epsilon = 0.0001;
-  if (Math.abs(pnl) < epsilon) {
-    result = 'BREAKEVEN';
-  } else if (pnl > 0) {
-    result = 'WIN';
-  } else {
-    result = 'LOSS';
-  }
+  if (Math.abs(pnl) < epsilon) result = 'BREAKEVEN';
+  else if (pnl > 0) result = 'WIN';
+  else result = 'LOSS';
 
-  return { pnl, pnlPercent, rr, result };
+  return {
+    pnl: Math.round(pnl * 100) / 100,
+    pnlPercent: null,
+    rr: Math.round(rr * 100) / 100,
+    result,
+  };
 }
 
 export interface AnalyticsSummary {

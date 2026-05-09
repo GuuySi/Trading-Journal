@@ -84,7 +84,7 @@ export function TradeTable({ trades }: Props) {
             <th className="px-3 py-3 text-left text-xs font-medium text-zinc-500 uppercase tracking-wide">Mode</th>
             <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide">Entry</th>
             <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide">Exit</th>
-            <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide">Size</th>
+            <th className="px-3 py-3 text-right text-xs font-medium text-zinc-500 uppercase tracking-wide">Risk</th>
             <TH col="rr">R:R</TH>
             <TH col="pnl">PnL</TH>
             <TH col="result">Result</TH>
@@ -122,7 +122,7 @@ export function TradeTable({ trades }: Props) {
                 {t.exitPrice ? fmt(t.exitPrice, 5) : '—'}
               </td>
               <td className="px-3 py-3 text-right font-mono text-zinc-400 text-xs">
-                {fmt(t.positionSize, 2)}
+                {t.riskAmount != null ? `$${t.riskAmount}` : '—'}
               </td>
               <td className="px-3 py-3 text-right font-mono text-zinc-300 text-xs">
                 {fmtRR(t.rr)}

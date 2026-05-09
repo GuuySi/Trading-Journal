@@ -44,8 +44,7 @@ const TradeSchema = z.object({
   exitPrice: z.number().positive().optional().nullable(),
   stopLoss: z.number().positive().optional().nullable(),
   takeProfit: z.number().positive().optional().nullable(),
-  positionSize: z.number().positive(),
-  accountBalance: z.number().positive().optional().nullable(),
+  riskAmount: z.number().positive().optional().nullable(),
   fees: z.number().min(0).default(0),
   strategyId: z.string().cuid().optional().nullable(),
   tags: z.array(z.string()).default([]),
@@ -151,20 +150,14 @@ router.post('/', async (req: AuthRequest, res, next) => {
       direction: data.direction,
       entryPrice: data.entryPrice,
       exitPrice: data.exitPrice ?? null,
-      positionSize: data.positionSize,
       fees: data.fees,
       stopLoss: data.stopLoss ?? null,
-      accountBalance: data.accountBalance ?? null,
+      riskAmount: data.riskAmount ?? null,
     });
 
-    const riskAmount =
-      data.stopLoss != null
-        ? Math.abs(data.entryPrice - data.stopLoss) * data.positionSize
-        : null;
-
     const rewardAmount =
-      data.takeProfit != null
-        ? Math.abs(data.takeProfit - data.entryPrice) * data.positionSize
+      data.riskAmount && data.takeProfit && data.stopLoss
+        ? data.riskAmount * Math.abs(data.takeProfit - data.entryPrice) / Math.abs(data.entryPrice - data.stopLoss)
         : null;
 
     const trade = await prisma.trade.create({
@@ -179,13 +172,13 @@ router.post('/', async (req: AuthRequest, res, next) => {
         exitPrice: data.exitPrice ?? null,
         stopLoss: data.stopLoss ?? null,
         takeProfit: data.takeProfit ?? null,
-        positionSize: data.positionSize,
-        accountBalance: data.accountBalance ?? null,
+        positionSize: null,
+        accountBalance: null,
         fees: data.fees,
         pnl,
         pnlPercent,
         rr,
-        riskAmount,
+        riskAmount: data.riskAmount ?? null,
         rewardAmount,
         result,
         strategyId: data.strategyId ?? null,
@@ -218,27 +211,24 @@ router.put('/:id', async (req: AuthRequest, res, next) => {
 
     const data = TradeSchema.partial().parse(req.body);
 
+    const mergedRiskAmount = data.riskAmount !== undefined ? data.riskAmount : existing.riskAmount;
+    const mergedStopLoss = data.stopLoss !== undefined ? data.stopLoss : existing.stopLoss;
+    const mergedTakeProfit = data.takeProfit !== undefined ? data.takeProfit : existing.takeProfit;
+
     const merged = {
       direction: (data.direction ?? existing.direction) as string,
       entryPrice: data.entryPrice ?? existing.entryPrice,
       exitPrice: data.exitPrice !== undefined ? data.exitPrice : existing.exitPrice,
-      positionSize: data.positionSize ?? existing.positionSize,
       fees: data.fees ?? existing.fees,
-      stopLoss: data.stopLoss !== undefined ? data.stopLoss : existing.stopLoss,
-      accountBalance:
-        data.accountBalance !== undefined ? data.accountBalance : existing.accountBalance,
+      stopLoss: mergedStopLoss,
+      riskAmount: mergedRiskAmount,
     };
 
     const { pnl, pnlPercent, rr, result } = calculateTradePnL(merged);
 
-    const riskAmount =
-      merged.stopLoss != null
-        ? Math.abs(merged.entryPrice - merged.stopLoss) * merged.positionSize
-        : existing.riskAmount;
-
     const rewardAmount =
-      data.takeProfit != null
-        ? Math.abs(data.takeProfit - merged.entryPrice) * merged.positionSize
+      mergedRiskAmount && mergedStopLoss && mergedTakeProfit
+        ? mergedRiskAmount * Math.abs(mergedTakeProfit - merged.entryPrice) / Math.abs(merged.entryPrice - mergedStopLoss)
         : existing.rewardAmount;
 
     const updateData: Record<string, unknown> = {};
@@ -252,8 +242,7 @@ router.put('/:id', async (req: AuthRequest, res, next) => {
     if (data.exitPrice !== undefined) updateData.exitPrice = data.exitPrice;
     if (data.stopLoss !== undefined) updateData.stopLoss = data.stopLoss;
     if (data.takeProfit !== undefined) updateData.takeProfit = data.takeProfit;
-    if (data.positionSize !== undefined) updateData.positionSize = data.positionSize;
-    if (data.accountBalance !== undefined) updateData.accountBalance = data.accountBalance;
+    if (data.riskAmount !== undefined) updateData.riskAmount = data.riskAmount;
     if (data.fees !== undefined) updateData.fees = data.fees;
     if (data.strategyId !== undefined) updateData.strategyId = data.strategyId;
     if (data.tags !== undefined) updateData.tags = data.tags;
@@ -438,7 +427,7 @@ router.post('/import/csv', multer({ storage: multer.memoryStorage() }).single('f
           exitPrice: row.exitPrice ? parseFloat(row.exitPrice) : undefined,
           stopLoss: row.stopLoss ? parseFloat(row.stopLoss) : undefined,
           takeProfit: row.takeProfit ? parseFloat(row.takeProfit) : undefined,
-          positionSize: parseFloat(row.positionSize),
+          riskAmount: row.riskAmount ? parseFloat(row.riskAmount) : undefined,
           fees: row.fees ? parseFloat(row.fees) : 0,
           tags: row.tags ? JSON.parse(row.tags) : [],
           mistakeTags: row.mistakeTags ? JSON.parse(row.mistakeTags) : [],
@@ -467,7 +456,8 @@ router.post('/import/csv', multer({ storage: multer.memoryStorage() }).single('f
             exitPrice: data.exitPrice ?? null,
             stopLoss: data.stopLoss ?? null,
             takeProfit: data.takeProfit ?? null,
-            positionSize: data.positionSize,
+            positionSize: null,
+            riskAmount: data.riskAmount ?? null,
             fees: data.fees,
             pnl,
             pnlPercent,

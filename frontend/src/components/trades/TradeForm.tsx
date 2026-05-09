@@ -19,8 +19,7 @@ const schema = z.object({
   exitPrice: z.coerce.number().positive().optional().or(z.literal('')),
   stopLoss: z.coerce.number().positive().optional().or(z.literal('')),
   takeProfit: z.coerce.number().positive().optional().or(z.literal('')),
-  positionSize: z.coerce.number().positive('Must be positive'),
-  accountBalance: z.coerce.number().positive().optional().or(z.literal('')),
+  riskAmount: z.coerce.number().positive().optional().or(z.literal('')),
   fees: z.coerce.number().min(0).default(0),
   strategyId: z.string().optional(),
   notes: z.string().max(5000).optional(),
@@ -78,8 +77,7 @@ export function TradeForm({ trade, onSuccess, onCancel, defaultMode = 'LIVE' }: 
       exitPrice: trade?.exitPrice ?? ('' as unknown as number),
       stopLoss: trade?.stopLoss ?? ('' as unknown as number),
       takeProfit: trade?.takeProfit ?? ('' as unknown as number),
-      positionSize: trade?.positionSize ?? ('' as unknown as number),
-      accountBalance: trade?.accountBalance ?? ('' as unknown as number),
+      riskAmount: trade?.riskAmount ?? ('' as unknown as number),
       fees: trade?.fees ?? 0,
       strategyId: trade?.strategyId ?? '',
       notes: trade?.notes ?? '',
@@ -87,13 +85,12 @@ export function TradeForm({ trade, onSuccess, onCancel, defaultMode = 'LIVE' }: 
     },
   });
 
-  const [entry, exit, sl, tp, direction, size] = watch([
+  const [entry, exit, sl, tp, direction] = watch([
     'entryPrice',
     'exitPrice',
     'stopLoss',
     'takeProfit',
     'direction',
-    'positionSize',
   ]);
 
   // Live RR preview
@@ -142,8 +139,7 @@ export function TradeForm({ trade, onSuccess, onCancel, defaultMode = 'LIVE' }: 
       exitPrice: values.exitPrice || undefined,
       stopLoss: values.stopLoss || undefined,
       takeProfit: values.takeProfit || undefined,
-      positionSize: values.positionSize,
-      accountBalance: values.accountBalance || undefined,
+      riskAmount: values.riskAmount || undefined,
       fees: values.fees,
       strategyId: values.strategyId || undefined,
       tags: selectedTags,
@@ -235,10 +231,9 @@ export function TradeForm({ trade, onSuccess, onCancel, defaultMode = 'LIVE' }: 
         <Input type="number" step="any" label="Take Profit" placeholder="0.00" {...register('takeProfit')} />
       </div>
 
-      {/* Row 4: Size + Balance + Fees + RR inline */}
-      <div className="grid grid-cols-4 gap-2">
-        <Input type="number" step="any" label="Size" placeholder="1.00" error={errors.positionSize?.message} {...register('positionSize')} />
-        <Input type="number" step="any" label="Balance" placeholder="10000" {...register('accountBalance')} />
+      {/* Row 4: Risk $ + Fees + RR inline */}
+      <div className="grid grid-cols-3 gap-2">
+        <Input type="number" step="any" label="Risk $" placeholder="100" {...register('riskAmount')} />
         <Input type="number" step="any" label="Fees" placeholder="0.00" {...register('fees')} />
         <div className="flex flex-col gap-1 justify-end">
           <label className="text-xs font-medium text-zinc-400 uppercase tracking-wide">R:R</label>

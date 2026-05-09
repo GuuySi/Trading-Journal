@@ -179,10 +179,6 @@ export function TradeDetailPage() {
             }
           />
           <DetailRow
-            label="Position Size"
-            value={<span className="font-mono">{fmt(trade.positionSize, 2)}</span>}
-          />
-          <DetailRow
             label="Fees"
             value={<span className="font-mono text-zinc-400">{fmtPnl(trade.fees)}</span>}
           />

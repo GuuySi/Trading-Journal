@@ -39,8 +39,8 @@ model Trade {
   takeProfit     Float?
 
   // Sizing
-  positionSize   Float
-  accountBalance Float?    // account balance at entry (for % calcs)
+  positionSize   Float?   // legacy, no longer used
+  accountBalance Float?
 
   // Financials (calculated on save)
   fees           Float     @default(0)

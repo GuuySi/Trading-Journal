@@ -30,7 +30,7 @@ export interface Trade {
   exitPrice: number | null;
   stopLoss: number | null;
   takeProfit: number | null;
-  positionSize: number;
+  positionSize: number | null;
   accountBalance: number | null;
   fees: number;
   pnl: number | null;
@@ -60,8 +60,7 @@ export interface TradeFormData {
   exitPrice?: number;
   stopLoss?: number;
   takeProfit?: number;
-  positionSize: number;
-  accountBalance?: number;
+  riskAmount?: number;
   fees: number;
   strategyId?: string;
   tags: string[];
