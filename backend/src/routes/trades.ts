@@ -439,9 +439,9 @@ router.post('/import/csv', multer({ storage: multer.memoryStorage() }).single('f
           direction: data.direction,
           entryPrice: data.entryPrice,
           exitPrice: data.exitPrice ?? null,
-          positionSize: data.positionSize,
           fees: data.fees,
           stopLoss: data.stopLoss ?? null,
+          riskAmount: data.riskAmount ?? null,
         });
 
         await prisma.trade.create({
