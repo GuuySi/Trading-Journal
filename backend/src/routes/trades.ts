@@ -254,7 +254,7 @@ router.put('/:id', async (req: AuthRequest, res, next) => {
     updateData.pnlPercent = pnlPercent;
     updateData.rr = rr;
     updateData.result = result;
-    updateData.riskAmount = riskAmount;
+    updateData.riskAmount = mergedRiskAmount;
     updateData.rewardAmount = rewardAmount;
 
     const trade = await prisma.trade.update({
